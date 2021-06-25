@@ -1,6 +1,10 @@
 # author: Nicolas Tessore <n.tessore@ucl.ac.uk>
 # license: MIT
 
+__version__ = '0.1.0'
+
+__all__ = ['NamespaceDict']
+
 import ast
 
 
