@@ -3,7 +3,7 @@ namespacedict
 
 |tests| |coverage|
 
-This package provides a `NamespaceDict` mapping which fully evaluates keys
+This package provides a ``NamespaceDict`` mapping which fully evaluates keys
 using Python.  For example, it can perform nested lookups, attribute lookups,
 and tuple splicing::
 
@@ -19,7 +19,7 @@ and tuple splicing::
     >>> # set a docstring attribute
     >>> ns['y'] = lambda x: x
     >>> ns['y.__doc__'] = 'my function'
-    >>> 
+    >>>
     >>> # set three items from a tuple
     >>> ns['a, b, c'] = 'A', 'B', 'C'
     >>> ns['b']
@@ -34,6 +34,20 @@ to create complex dictionary queries as expected::
     >>> ns['x[::-one]']
     [3, 4, 5]
 
+The ``NamespaceDict`` type can also be used as an adapter for other mappings,
+by passing the underlying data structure on initialisation::
+
+    >>> # create a numpy array with named columns
+    >>> import numpy as np
+    >>> a = np.empty(5, dtype=[('col1', int), ('col2', int), ('col3', int)])
+    >>>
+    >>> # use NamespaceDict to access array
+    >>> ns = NamespaceDict(a)
+    >>>
+    >>> # access named columns through namespace
+    >>> ns['col1, col2, col3'] = 1, 2, 3
+    >>> ns['col2']
+    array([2, 2, 2, 2, 2])
 
 .. |tests| image:: https://github.com/ntessore/namespacedict/actions/workflows/test.yml/badge.svg
 .. |coverage| image:: https://codecov.io/gh/ntessore/namespacedict/branch/main/graph/badge.svg?token=V0OKE8EBSY
