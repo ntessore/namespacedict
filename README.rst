@@ -1,8 +1,6 @@
 namespacedict
 =============
 
-.. highlight:: python
-
 |tests| |coverage|
 
 This package provides a `NamespaceDict` mapping which fully evaluates keys
