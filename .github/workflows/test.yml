@@ -13,10 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         python: [3.6, 3.7, 3.8, 3.9]
-        include:
-        - python: 3.9
-          coverage: true
-          testenv: -cov
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
@@ -25,6 +21,5 @@ jobs:
     - run: |
         pip install tox
     - run: |
-        tox -e test${{ matrix.testenv }}
-    - if: matrix.coverage
-      uses: codecov/codecov-action@v1
+        tox -e test-cov
+    - uses: codecov/codecov-action@v1

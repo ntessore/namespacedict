@@ -47,6 +47,12 @@ class NamespaceDict:
     def _set_Name(self, key, node, value):
         self.data[node.id] = value
 
+    def _get_Num(self, key, node):
+        return node.n
+
+    def _get_Str(self, key, node):
+        return node.s
+
     def _get_Constant(self, key, node):
         return node.value
 
@@ -61,6 +67,9 @@ class NamespaceDict:
         upper = node.upper and self._get(key, node.upper)
         step = node.step and self._get(key, node.step)
         return slice(lower, upper, step)
+
+    def _get_Index(self, key, node):
+        return self._get(key, node.value)
 
     def _get_Attribute(self, key, node):
         return getattr(self._get(key, node.value), node.attr)

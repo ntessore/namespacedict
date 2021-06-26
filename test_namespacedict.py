@@ -22,6 +22,7 @@ def test_name(ns):
 
 def test_constant(ns):
     assert ns['1'] == 1
+    assert ns['"a"'] == 'a'
     with pytest.raises(SyntaxError):
         ns['1'] = 2
 
