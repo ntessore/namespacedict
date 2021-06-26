@@ -3,6 +3,8 @@ namespacedict
 
 .. highlight:: python
 
+|tests| |coverage|
+
 This package provides a `NamespaceDict` mapping which fully evaluates keys
 using Python.  For example, it can perform nested lookups, attribute lookups,
 and tuple splicing::
@@ -33,3 +35,7 @@ to create complex dictionary queries as expected::
     >>> ns['x[0:two]'] = 5, 4
     >>> ns['x[::-one]']
     [3, 4, 5]
+
+
+.. |tests| image:: https://github.com/ntessore/namespacedict/actions/workflows/test.yml/badge.svg
+.. |coverage| image:: https://codecov.io/gh/ntessore/namespacedict/branch/main/graph/badge.svg?token=V0OKE8EBSY
