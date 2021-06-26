@@ -22,7 +22,7 @@ class NamespaceDict(UserDict):
         return self._dispatch(key, self._set, value)
 
     @staticmethod
-    def _bad_node(key, node):
+    def _syntax_error(key, node):
         details = ('<key>', node.lineno, node.col_offset+1, key)
         raise SyntaxError('invalid syntax', details)
 
@@ -35,13 +35,13 @@ class NamespaceDict(UserDict):
     def _get(self, key, node):
         meth = getattr(self, f'_get_{node.__class__.__name__}', None)
         if meth is None:
-            self._bad_node(key, node)
+            self._syntax_error(key, node)
         return meth(key, node)
 
     def _set(self, key, node, value):
         meth = getattr(self, f'_set_{node.__class__.__name__}', None)
         if meth is None:
-            self._bad_node(key, node)
+            self._syntax_error(key, node)
         return meth(key, node, value)
 
     def _get_Name(self, key, node):
