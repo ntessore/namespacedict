@@ -105,22 +105,23 @@ class NamespaceDict(UserDict):
         return [self._get(key, e) for e in node.elts]
 
     def _get_UnaryOp(self, key, node):
-        return self._unary_op(key, node.op, self._get(key, node.operand))
+        op = getattr(self, f'_op_{node.op.__class__.__name__}', None)
+        if op is None:
+            self._bad_node(key, node)
+        return op(self._get(key, node.operand))
 
-    def _unary_op(self, key, op, operand):
-        meth = getattr(self, f'_unary_op_{op.__class__.__name__}', None)
-        if meth is None:
-            self._bad_node(key, op)
-        return meth(operand)
-
-    def _unary_op_UAdd(self, operand):
+    @staticmethod
+    def _op_UAdd(operand):
         return +operand
 
-    def _unary_op_USub(self, operand):
+    @staticmethod
+    def _op_USub(operand):
         return -operand
 
-    def _unary_op_Not(self, operand):
+    @staticmethod
+    def _op_Not(operand):
         return not operand
 
-    def _unary_op_Invert(self, operand):
+    @staticmethod
+    def _op_Invert(operand):
         return ~operand
