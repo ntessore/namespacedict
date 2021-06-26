@@ -21,6 +21,9 @@ class NamespaceDict(UserDict):
     def __setitem__(self, key, value):
         return self._dispatch(key, self._set, value)
 
+    def __delitem__(self, key):
+        return self._dispatch(key, self._del)
+
     @staticmethod
     def _syntax_error(key, node):
         details = ('<key>', node.lineno, node.col_offset+1, key)
@@ -44,11 +47,20 @@ class NamespaceDict(UserDict):
             self._syntax_error(key, node)
         return meth(key, node, value)
 
+    def _del(self, key, node):
+        meth = getattr(self, f'_del_{node.__class__.__name__}', None)
+        if meth is None:
+            self._syntax_error(key, node)
+        return meth(key, node)
+
     def _get_Name(self, key, node):
         return self.data[node.id]
 
     def _set_Name(self, key, node, value):
         self.data[node.id] = value
+
+    def _del_Name(self, key, node):
+        del(self.data[node.id])
 
     def _get_Num(self, key, node):
         return node.n
@@ -65,6 +77,9 @@ class NamespaceDict(UserDict):
     def _set_Subscript(self, key, node, value):
         self._get(key, node.value)[self._get(key, node.slice)] = value
 
+    def _del_Subscript(self, key, node):
+        del(self._get(key, node.value)[self._get(key, node.slice)])
+
     def _get_Slice(self, key, node):
         lower = node.lower and self._get(key, node.lower)
         upper = node.upper and self._get(key, node.upper)
@@ -79,6 +94,9 @@ class NamespaceDict(UserDict):
 
     def _set_Attribute(self, key, node, value):
         setattr(self._get(key, node.value), node.attr, value)
+
+    def _del_Attribute(self, key, node):
+        delattr(self._get(key, node.value), node.attr)
 
     def _get_Tuple(self, key, node):
         return tuple(self._get(key, e) for e in node.elts)
@@ -100,6 +118,10 @@ class NamespaceDict(UserDict):
         else:
             raise ValueError(f'too many values to unpack '
                              f'(expected {len(node.elts)})')
+
+    def _del_Tuple(self, key, node):
+        for e in node.elts:
+            self._del(key, e)
 
     def _get_List(self, key, node):
         return [self._get(key, e) for e in node.elts]

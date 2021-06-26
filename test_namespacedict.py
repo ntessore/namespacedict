@@ -32,6 +32,8 @@ def test_mapping(ns):
 def test_name(ns):
     ns['x'] = 1
     assert ns['x'] == 1
+    del(ns['x'])
+    assert 'x' not in ns
 
 
 def test_constant(ns):
@@ -39,6 +41,8 @@ def test_constant(ns):
     assert ns['"a"'] == 'a'
     with pytest.raises(SyntaxError):
         ns['1'] = 2
+    with pytest.raises(SyntaxError):
+        del(ns['1'])
 
 
 def test_subscript(ns):
@@ -46,6 +50,8 @@ def test_subscript(ns):
     assert ns['x[0]'] == 0
     ns['x[0]'] = 1
     assert ns['x[0]'] == 1
+    del(ns['x[0]'])
+    assert len(ns['x']) == 0
 
 
 def test_slice(ns):
@@ -53,18 +59,24 @@ def test_slice(ns):
     assert ns['x[0:2]'] == [0, 1]
     ns['x[0:2]'] = [4, 3]
     assert ns['x[::-1]'] == [2, 3, 4]
+    del(ns['x[:2]'])
+    assert len(ns['x']) == 1
 
 
 def test_attribute(ns):
     ns['x'] = lambda x: x
     ns['x.__doc__'] = 'doc'
     assert ns['x.__doc__'] == 'doc'
+    del(ns['x.__doc__'])
+    assert ns['x.__doc__'] is None
 
 
 def test_tuple(ns):
     ns['x, y, z'] = 1, 2, 3
     assert ns['x, y, z'] == (1, 2, 3)
     assert type(ns['x, y, z']) is tuple
+    del(ns['x, y, z'])
+    assert 'x' not in ns and 'y' not in ns and 'z' not in ns
 
     with pytest.raises(ValueError, match='too many values to unpack'):
         ns['x, y, z'] = 1, 2, 3, 4
