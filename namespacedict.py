@@ -13,21 +13,21 @@ class NamespaceDict:
         self.data = data if data is not None else {}
 
     def __getitem__(self, key):
-        if not isinstance(key, str):
-            raise TypeError('key is not a string')
-        expr = ast.parse(key, filename='<key>', mode='eval')
-        return self._get(key, expr.body)
+        return self._dispatch(key, self._get)
 
     def __setitem__(self, key, value):
-        if not isinstance(key, str):
-            raise TypeError('key is not a string')
-        expr = ast.parse(key, filename='<key>', mode='eval')
-        return self._set(key, expr.body, value)
+        return self._dispatch(key, self._set, value)
 
     @staticmethod
     def _bad_node(key, node):
         details = ('<key>', node.lineno, node.col_offset+1, key)
         raise SyntaxError('invalid syntax', details)
+
+    def _dispatch(self, key, meth, *args):
+        if not isinstance(key, str):
+            raise TypeError('key is not a string')
+        expr = ast.parse(key, filename='<key>', mode='eval')
+        return meth(key, expr.body, *args)
 
     def _get(self, key, node):
         meth = getattr(self, f'_get_{node.__class__.__name__}', None)
