@@ -29,6 +29,16 @@ def test_mapping(ns):
     assert list(ns.items()) == [('x', 1), ('y', 2), ('z', 3)]
 
 
+def test_invalid(ns):
+    with pytest.raises(TypeError):
+        ns[0]
+
+    for key in ('f()', 'lambda: None', 'x = y', 'import sys', 'type(())',
+                '().__class__.__bases__[0].__subclasses__()'):
+        with pytest.raises(SyntaxError):
+            ns[key]
+
+
 def test_name(ns):
     ns['x'] = 1
     assert ns['x'] == 1
