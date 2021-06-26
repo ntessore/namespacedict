@@ -7,12 +7,26 @@ def ns():
     return NamespaceDict()
 
 
+def test_abc(ns):
+    from collections.abc import MutableMapping
+    assert isinstance(ns, MutableMapping)
+
+
 def test_init(ns):
     assert ns.data == {}
 
     d = object()
     ns = NamespaceDict(d)
     assert ns.data is d
+
+
+def test_mapping(ns):
+    ns.data = {'x': 1, 'y': 2, 'z': 3}
+    assert len(ns) == 3
+    assert list(k for k in ns) == ['x', 'y', 'z']
+    assert list(ns.keys()) == ['x', 'y', 'z']
+    assert list(ns.values()) == [1, 2, 3]
+    assert list(ns.items()) == [('x', 1), ('y', 2), ('z', 3)]
 
 
 def test_name(ns):

@@ -6,11 +6,14 @@ __version__ = '0.1.0'
 __all__ = ['NamespaceDict']
 
 import ast
+from collections import UserDict
 
 
-class NamespaceDict:
+class NamespaceDict(UserDict):
     def __init__(self, data=None):
-        self.data = data if data is not None else {}
+        super().__init__()
+        if data is not None:
+            self.data = data
 
     def __getitem__(self, key):
         return self._dispatch(key, self._get)
