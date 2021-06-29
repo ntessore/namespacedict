@@ -4,8 +4,8 @@ namespacedict
 |tests| |coverage|
 
 This package provides a ``NamespaceDict`` mapping which fully evaluates keys
-using Python.  For example, it can perform nested lookups, attribute lookups,
-and tuple splicing::
+using Python syntax.  For example, it can perform nested lookups, attribute
+lookups, and tuple splicing::
 
     >>> from namespacedict import NamespaceDict
     >>>
@@ -19,6 +19,8 @@ and tuple splicing::
     >>> # set a docstring attribute
     >>> ns['y'] = lambda x: x
     >>> ns['y.__doc__'] = 'my function'
+    >>> ns['y.__doc__']
+    'my function'
     >>>
     >>> # set three items from a tuple
     >>> ns['a, b, c'] = 'A', 'B', 'C'
@@ -26,7 +28,7 @@ and tuple splicing::
     'B'
 
 Keys are parsed in a safe way using Python's AST library.  It is thus possible
-to create complex dictionary queries as expected::
+to create complex dictionary queries that work as expected::
 
     >>> ns['one'] = 1
     >>> ns['two'] = 2
@@ -49,5 +51,9 @@ by passing the underlying data structure on initialisation::
     >>> ns['col2']
     array([2, 2, 2, 2, 2])
 
+The mapping can be retrieved using the ``.data`` attribute.
+
 .. |tests| image:: https://github.com/ntessore/namespacedict/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/ntessore/namespacedict/actions/workflows/test.yml
 .. |coverage| image:: https://codecov.io/gh/ntessore/namespacedict/branch/main/graph/badge.svg?token=V0OKE8EBSY
+   :target: https://codecov.io/gh/ntessore/namespacedict
