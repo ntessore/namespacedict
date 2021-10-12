@@ -37,18 +37,23 @@ def test_invalid(ns):
                 '().__class__.__bases__[0].__subclasses__()'):
         with pytest.raises(SyntaxError):
             ns[key]
+        with pytest.raises(SyntaxError):
+            key in ns
 
 
 def test_name(ns):
     ns['x'] = 1
     assert ns['x'] == 1
+    assert 'x' in ns
     del(ns['x'])
     assert 'x' not in ns
 
 
 def test_constant(ns):
     assert ns['1'] == 1
+    assert '1' in ns
     assert ns['"a"'] == 'a'
+    assert '"a"' in ns
     with pytest.raises(SyntaxError):
         ns['1'] = 2
     with pytest.raises(SyntaxError):
@@ -58,10 +63,13 @@ def test_constant(ns):
 def test_subscript(ns):
     ns['x'] = [0]
     assert ns['x[0]'] == 0
+    assert 'x[0]' in ns
     ns['x[0]'] = 1
     assert ns['x[0]'] == 1
     del(ns['x[0]'])
     assert len(ns['x']) == 0
+    assert 'x[0]' not in ns
+    assert 'y[0]' not in ns
 
 
 def test_slice(ns):
@@ -75,18 +83,24 @@ def test_slice(ns):
 
 def test_attribute(ns):
     ns['x'] = lambda x: x
-    ns['x.__doc__'] = 'doc'
-    assert ns['x.__doc__'] == 'doc'
-    del(ns['x.__doc__'])
-    assert ns['x.__doc__'] is None
+    ns['x.myattrib'] = 'myval'
+    assert ns['x.myattrib'] == 'myval'
+    assert 'x.myattrib' in ns
+    del(ns['x.myattrib'])
+    with pytest.raises(AttributeError):
+        ns['x.myattrib']
+    assert 'x.myattrib' not in ns
 
 
 def test_tuple(ns):
     ns['x, y, z'] = 1, 2, 3
     assert ns['x, y, z'] == (1, 2, 3)
     assert type(ns['x, y, z']) is tuple
-    del(ns['x, y, z'])
-    assert 'x' not in ns and 'y' not in ns and 'z' not in ns
+    assert 'x, y, z' in ns
+    del(ns['x, y'])
+    assert 'x, y' not in ns
+    assert 'x' not in ns and 'y' not in ns
+    assert 'y, z' not in ns
 
     with pytest.raises(ValueError, match='too many values to unpack'):
         ns['x, y, z'] = 1, 2, 3, 4

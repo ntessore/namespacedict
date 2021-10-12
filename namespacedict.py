@@ -1,7 +1,7 @@
 # author: Nicolas Tessore <n.tessore@ucl.ac.uk>
 # license: MIT
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 __all__ = ['NamespaceDict']
 
@@ -14,6 +14,9 @@ class NamespaceDict(UserDict):
         super().__init__()
         if data is not None:
             self.data = data
+
+    def __contains__(self, key):
+        return self._dispatch(key, self._has)
 
     def __getitem__(self, key):
         return self._dispatch(key, self._get)
@@ -35,6 +38,12 @@ class NamespaceDict(UserDict):
         expr = ast.parse(key, filename='<key>', mode='eval')
         return meth(key, expr.body, *args)
 
+    def _has(self, key, node):
+        meth = getattr(self, f'_has_{node.__class__.__name__}', None)
+        if meth is None:
+            self._syntax_error(key, node)
+        return meth(key, node)
+
     def _get(self, key, node):
         meth = getattr(self, f'_get_{node.__class__.__name__}', None)
         if meth is None:
@@ -53,6 +62,11 @@ class NamespaceDict(UserDict):
             self._syntax_error(key, node)
         return meth(key, node)
 
+####
+
+    def _has_Name(self, key, node):
+        return node.id in self.data
+
     def _get_Name(self, key, node):
         return self.data[node.id]
 
@@ -62,14 +76,35 @@ class NamespaceDict(UserDict):
     def _del_Name(self, key, node):
         del(self.data[node.id])
 
+####
+
+    def _has_Num(self, key, node):
+        return True
+
     def _get_Num(self, key, node):
         return node.n
+
+####
+
+    def _has_Str(self, key, node):
+        return True
 
     def _get_Str(self, key, node):
         return node.s
 
+####
+
+    def _has_Constant(self, key, node):
+        return True
+
     def _get_Constant(self, key, node):
         return node.value
+
+####
+
+    def _has_Subscript(self, key, node):
+        return self._has(key, node.value) \
+                and self._get(key, node.slice) in self._get(key, node.value)
 
     def _get_Subscript(self, key, node):
         return self._get(key, node.value)[self._get(key, node.slice)]
@@ -80,14 +115,23 @@ class NamespaceDict(UserDict):
     def _del_Subscript(self, key, node):
         del(self._get(key, node.value)[self._get(key, node.slice)])
 
+####
+
     def _get_Slice(self, key, node):
         lower = node.lower and self._get(key, node.lower)
         upper = node.upper and self._get(key, node.upper)
         step = node.step and self._get(key, node.step)
         return slice(lower, upper, step)
 
+####
+
     def _get_Index(self, key, node):
         return self._get(key, node.value)
+
+####
+
+    def _has_Attribute(self, key, node):
+        return hasattr(self._get(key, node.value), node.attr)
 
     def _get_Attribute(self, key, node):
         return getattr(self._get(key, node.value), node.attr)
@@ -97,6 +141,11 @@ class NamespaceDict(UserDict):
 
     def _del_Attribute(self, key, node):
         delattr(self._get(key, node.value), node.attr)
+
+####
+
+    def _has_Tuple(self, key, node):
+        return all(self._has(key, e) for e in node.elts)
 
     def _get_Tuple(self, key, node):
         return tuple(self._get(key, e) for e in node.elts)
@@ -123,8 +172,12 @@ class NamespaceDict(UserDict):
         for e in node.elts:
             self._del(key, e)
 
+####
+
     def _get_List(self, key, node):
         return [self._get(key, e) for e in node.elts]
+
+####
 
     def _get_UnaryOp(self, key, node):
         op = getattr(self, f'_op_{node.op.__class__.__name__}', None)
